@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace tictactoe
+namespace Tictactoe
 {
     public class GameManager : MonoBehaviour
     {
