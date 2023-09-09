@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 192199916}
   - component: {fileID: 192199915}
   m_Layer: 0
-  m_Name: Grid
+  m_Name: GridManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -156,6 +156,16 @@ MonoBehaviour:
   _grid: {fileID: 192199916}
   _tilePrefab: {fileID: 1351953161022333716, guid: 7da259c760fd0734a9940f6d067dcc08,
     type: 3}
+  Tiles:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!156049354 &192199916
 Grid:
   m_ObjectHideFlags: 0
@@ -470,6 +480,19 @@ MonoBehaviour:
   _symbols:
   - {fileID: 4629966100118641345, guid: 39a18d6e065d47d4ca662ab3e9205c8e, type: 3}
   - {fileID: 4807584469301130683, guid: ae31b99a7a35498429d954158b520722, type: 3}
+  _tileContents:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _winCon: 000000000100000002000000030000000400000005000000060000000700000008000000020000000500000008000000010000000400000007000000000000000300000006000000020000000400000006000000000000000400000008000000
+  _gridManager: {fileID: 192199914}
+  _board: {fileID: 1421521707}
   _turn: 0
 --- !u!4 &446970323
 Transform:
