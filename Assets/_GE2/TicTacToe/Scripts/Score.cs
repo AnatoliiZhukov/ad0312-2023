@@ -23,10 +23,5 @@ namespace Tictactoe
                 SetPlayerScore(p, score);
             }
         }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space)) SetPlayerScore(true, 80);
-        }
     }
 }
