@@ -1,6 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Tictactoe
@@ -14,9 +12,9 @@ namespace Tictactoe
 
         private void Awake() => _highlight = transform.GetChild(0).gameObject;
 
-        private void OnMouseEnter() // Activate the highligh object on mouse enter if the tile doesn't contain a symbol
+        private void OnMouseOver()
         {
-            if(GameManager.Instance.Playable && Contents == null) _highlight.SetActive(true);
+            if(!_highlight.activeSelf && GameManager.Instance.Playable && Contents == null) _highlight.SetActive(true);
         }
         private void OnMouseExit()
         {

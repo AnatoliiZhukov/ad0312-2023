@@ -1,4 +1,1 @@
-using UnityEngine;
-
-public class O : MonoBehaviour
-{}
+using UnityEngine; namespace Tictactoe { public class O : MonoBehaviour { } }

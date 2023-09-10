@@ -1,7 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Tictactoe
 {
@@ -14,26 +15,25 @@ namespace Tictactoe
         [SerializeField] private GameObject[] _symbols;
         [SerializeField] private GameObject[] _tileContents = new GameObject[9];
         [SerializeField] private int[] _winCon;
-        [SerializeField] private GameObject _gridManager, _board;
+        [SerializeField] private GameObject _gridManager, _board, _score;
         [SerializeField] private bool _turn = false; // true = it's first player's turn, false = it's second player's turn
-        private int _p1Score, _p2Score;
+        private int _p1Score, _p2Score, turnCounter;
 
         private void Awake()
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(this);
+                Destroy(gameObject);
             }
             else
             {
                 Instance = this;
+                DontDestroyOnLoad(gameObject);
             }
-
-            //DontDestroyOnLoad(gameObject);
         }
         private void Start()
         {
-            OnSceneReload();
+            OnGameRestart();
         }
 
         public void PlaceSymbol(Transform tile)
@@ -50,90 +50,123 @@ namespace Tictactoe
                 tileScript.Contents = symbol;
                 _turn = false;
             }
-            //_turnCounter++;
+            turnCounter++;
             WinConCheck();
         }
         private void WinConCheck()
         {
-            for (int i = 0; i < 9; i++)
+            if (turnCounter < 5) return;
+            else
             {
-                _tileContents[i] = _gridManager.GetComponent<GridManager>().Tiles[i].GetComponent<Tile>().Contents;
-            }
-            // Cycle through the _winCon array, 3 tiles at a time
-            for (int i = 0; i < _winCon.Length; i += 3)
-            {
-                if (_tileContents[_winCon[i]] != null)
+                for (int i = 0; i < 9; i++)
                 {
-                    var nextSymbols = new List<bool>();
-                    for (int j = i; j < (i + 3); j++)
+                    _tileContents[i] = _gridManager.GetComponent<GridManager>().Tiles[i].GetComponent<Tile>().Contents;
+                }
+                // Cycle through the _winCon array, 3 tiles at a time
+                for (int i = 0; i < _winCon.Length; i += 3)
+                {
+                    if (_tileContents[_winCon[i]] != null)
                     {
-                        if (_tileContents[_winCon[j]] == null) break;
-                        else
+                        var nextSymbols = new List<bool>();
+                        for (int j = i; j < (i + 3); j++)
                         {
-                            bool symbolInTile; //false if X, true if O
-                            _tileContents[_winCon[j]].TryGetComponent<X>(out var x);
-                            if (x is X) symbolInTile = false;
-                            else symbolInTile = true;
-                            nextSymbols.Add(symbolInTile);
-                            if (nextSymbols.Count > 0 && nextSymbols[0] != symbolInTile) break;
-                            if (nextSymbols.Count == 3)
+                            if (_tileContents[_winCon[j]] == null) break;
+                            else
                             {
-                                // Add the symbols to a list so that they don't get deleted when on EndGame
-                                var wSymbols = new List<GameObject>();
-                                for (int k = 0; k < 3; k++)
+                                bool symbolInTile; //false if X, true if O
+                                _tileContents[_winCon[j]].TryGetComponent<X>(out var x);
+                                if (x is X) symbolInTile = false;
+                                else symbolInTile = true;
+                                nextSymbols.Add(symbolInTile);
+                                if (nextSymbols.Count > 0 && nextSymbols[0] != symbolInTile) break;
+                                if (nextSymbols.Count == 3) // if 3 of the same symbol are detected in a row, call EndGame
                                 {
-                                    wSymbols.Add(_tileContents[_winCon[i + k]]);
+                                    // Add the symbols to a list so that they don't get deleted when on EndGame
+                                    var wSymbols = new List<GameObject>();
+                                    for (int k = 0; k < 3; k++)
+                                    {
+                                        wSymbols.Add(_tileContents[_winCon[i + k]]);
+                                    }
+                                    EndGame(false, symbolInTile, wSymbols); break;
                                 }
-                                EndGame(symbolInTile, wSymbols); break;
                             }
+                        }
+                        if (turnCounter == 9)
+                        {
+                            EndGame(true, false, null);
                         }
                     }
                 }
             }
         }
-        private void EndGame(bool winner, List<GameObject> wSymbols)
+        private void EndGame(bool tie, bool winner, List<GameObject> wSymbols)
         {
             Playable = false;
-
-            if (!winner)
+            turnCounter = 0;
+            if (tie)
             {
-                _p1Score++;
-                Debug.Log("Player1 won");
+                StartCoroutine(RestartGame(1));
             }
             else
             {
-                _p2Score++;
-                Debug.Log("Player2 won");
-            }
-
-            for (int i = 0; i < _tileContents.Length; i++)
-            {
-                if (_tileContents[i] != null && !wSymbols.Contains(_tileContents[i]))
+                if (!winner)
                 {
-                    Destroy(_tileContents[i]);
+                    _p1Score++;
+                    _score.GetComponent<Score>().SetPlayerScore(winner, _p1Score);
                 }
-            }
-            Destroy(_board);
+                else
+                {
+                    _p2Score++;
+                    _score.GetComponent<Score>().SetPlayerScore(winner, _p2Score);
+                }
 
-            StartCoroutine(RestartScene(1));
+                foreach (GameObject obj in _tileContents)
+                {
+                    if (!wSymbols.Contains(obj)) Destroy(obj);
+                }
+
+                StartCoroutine(RestartGame(1));
+            }
         }
 
-        private IEnumerator RestartScene(int s)
+        private IEnumerator RestartGame(int s)
         {
+            _board.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 0);
+
             yield return new WaitForSeconds(s);
 
-            // Get the name of the currently active scene
-            string currentSceneName = SceneManager.GetActiveScene().name;
+            foreach (GameObject obj in _tileContents)
+            {
+                Destroy(obj);
+            }
 
-            // Reload the current scene
-            SceneManager.LoadScene(currentSceneName);
-            OnSceneReload();
+            _board.GetComponent<SpriteRenderer>().color = new Color(255, 255, 255, 255);
+
+            OnGameRestart();
         }
 
-        private void OnSceneReload()
+        private void OnGameRestart() // = on game restart
         {
             Playable = true;
-            _turn = false;
+
+            if ((_p1Score + _p2Score) % 2 == 0)
+            {
+                _turn = false;
+            }
+            else
+            {
+                _turn = true;
+            }
+
+            foreach (GameObject obj in _tileContents)
+            {
+                if (obj != null) Destroy(obj);
+            }
+
+            _tileContents = new GameObject[9];
+
+            _gridManager = GameObject.Find("GridManager");
+            _board = GameObject.Find("Board");
         }
     }
 }
