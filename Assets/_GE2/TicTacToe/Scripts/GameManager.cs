@@ -14,8 +14,9 @@ namespace Tictactoe
         [SerializeField] private GameObject[] _tileContents = new GameObject[9];
         [SerializeField] private int[] _winCon;
         [SerializeField] private GameObject _gridManager, _board, _score;
+        [SerializeField] private GameObject _tieMsg, _p1WMsg, _p2WMsg;
         [SerializeField] private bool _turn = false; // true = it's first player's turn, false = it's second player's turn
-        private int _p1Score, _p2Score, turnCounter;
+        private int _p1Score, _p2Score, _turnCounter;
 
         private void Awake()
         {
@@ -48,12 +49,13 @@ namespace Tictactoe
                 tileScript.Contents = symbol;
                 _turn = false;
             }
-            turnCounter++;
+            _turnCounter++;
             WinConCheck();
         }
         private void WinConCheck()
         {
-            if (turnCounter < 5) return;
+            var winnerDetermined = false;
+            if (_turnCounter < 5) return;
             else
             {
                 for (int i = 0; i < 9; i++)
@@ -89,31 +91,31 @@ namespace Tictactoe
                                 }
                             }
                         }
-                        if (turnCounter == 9)
-                        {
-                            EndGame(true, false, null);
-                        }
                     }
                 }
             }
+            if (!winnerDetermined && _turnCounter == 9) EndGame(true, false, null);
         }
         private void EndGame(bool tie, bool winner, List<GameObject> wSymbols)
         {
             Playable = false;
-            turnCounter = 0;
+            _turnCounter = 0;
             if (tie)
             {
+                _tieMsg.SetActive(true);
                 StartCoroutine(RestartGame(1));
             }
             else
             {
                 if (!winner)
                 {
+                    _p1WMsg.SetActive(true);
                     _p1Score++;
                     _score.GetComponent<Score>().SetPlayerScore(winner, _p1Score);
                 }
                 else
                 {
+                    _p2WMsg.SetActive(true);
                     _p2Score++;
                     _score.GetComponent<Score>().SetPlayerScore(winner, _p2Score);
                 }
@@ -145,6 +147,10 @@ namespace Tictactoe
 
         private void OnGameRestart() // = on game restart
         {
+            _p1WMsg.SetActive(false);
+            _p2WMsg.SetActive(false);
+            _tieMsg.SetActive(false);
+
             Playable = true;
 
             if ((_p1Score + _p2Score) % 2 == 0)
